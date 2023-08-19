@@ -35,18 +35,19 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 
     // Content Negotiation
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
 
     // Sessions
-    implementation("io.ktor:ktor-server-sessions-jvm")
+    implementation("io.ktor:ktor-server-sessions-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")
 
     // Auth
-    implementation("io.ktor:ktor-server-auth-jvm")
+    implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
 
     // KMongo
-    implementation("org.litote.kmongo:kmongo-async:4.10.0")
-    implementation("org.litote.kmongo:kmongo-coroutine-serialization:4.10.0")
+    implementation("org.litote.kmongo:kmongo-async:$kmongoVersion")
+    implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
 
     // Koin core features
     implementation("io.insert-koin:koin-core:$koinVersion")

@@ -7,7 +7,7 @@ import io.ktor.server.routing.*
 import sky.tavrov.domain.model.Endpoint
 
 fun Route.unauthorizedRoute() {
-    get(Endpoint.Unautorized.path) {
+    get(Endpoint.Unauthorized.path) {
         call.respond(
             message = "Not Authorized.",
             status = HttpStatusCode.Unauthorized

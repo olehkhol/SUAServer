@@ -13,7 +13,7 @@ fun Application.configureAuth() {
                 session
             }
             challenge {
-                call.respondRedirect(Endpoint.Unautorized.path)
+                call.respondRedirect(Endpoint.Unauthorized.path)
             }
         }
     }

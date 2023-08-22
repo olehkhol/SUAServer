@@ -4,10 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 import sky.tavrov.domain.repository.UserDataSource
-import sky.tavrov.routes.authorizedRoute
-import sky.tavrov.routes.rootRoute
-import sky.tavrov.routes.tokenVerificationRoute
-import sky.tavrov.routes.unauthorizedRoute
+import sky.tavrov.routes.*
 
 fun Application.configureRouting() {
     routing {
@@ -15,6 +12,7 @@ fun Application.configureRouting() {
 
         rootRoute()
         tokenVerificationRoute(application, userDataSource)
+        getUserInfoRoute(application, userDataSource)
         authorizedRoute()
         unauthorizedRoute()
     }

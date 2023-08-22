@@ -16,7 +16,11 @@ class UserDataSourceImpl(
         users.findOne(filter = User::id eq userId)
 
     override suspend fun saveUserInfo(user: User): Boolean =
-        users.insertOne(document = user).wasAcknowledged()
+        if (getUserInfo(user.id) == null) {
+            users.insertOne(document = user).wasAcknowledged()
+        } else {
+            true
+        }
 
     override suspend fun deleteUser(userId: String): Boolean =
         users.deleteOne(filter = User::id eq userId).wasAcknowledged()
@@ -25,8 +29,9 @@ class UserDataSourceImpl(
         userId: String,
         firstName: String,
         lastName: String
-    ): Boolean = users.updateOne(
-        filter = User::id eq userId,
-        update = setValue(property = User::name, value = "$firstName $lastName")
-    ).wasAcknowledged()
+    ): Boolean =
+        users.updateOne(
+            filter = User::id eq userId,
+            update = setValue(property = User::name, value = "$firstName $lastName")
+        ).wasAcknowledged()
 }

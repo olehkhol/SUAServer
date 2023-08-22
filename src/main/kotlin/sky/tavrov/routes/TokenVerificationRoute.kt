@@ -9,13 +9,19 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import io.ktor.util.pipeline.*
 import sky.tavrov.domain.model.ApiRequest
 import sky.tavrov.domain.model.Endpoint
+import sky.tavrov.domain.model.User
 import sky.tavrov.domain.model.UserSession
+import sky.tavrov.domain.repository.UserDataSource
 import sky.tavrov.util.Constants.AUDIENCE
 import sky.tavrov.util.Constants.ISSUER
 
-fun Route.tokenVerificationRoute(app: Application) {
+fun Route.tokenVerificationRoute(
+    app: Application,
+    userDataSource: UserDataSource
+) {
     post(Endpoint.TokenVerification.path) {
         val request = call.receive<ApiRequest>()
 
@@ -23,22 +29,41 @@ fun Route.tokenVerificationRoute(app: Application) {
             val result = verifyGoogleTokenId(tokenId = request.tokenId)
 
             if (result != null) {
-
-                val name = result.payload["name"].toString()
-                val email = result.payload["email"].toString()
-                app.log.info("TOKEN SUCCESSFULLY VERIFIED: $name $email")
-
-
-                call.sessions.set(UserSession(id = "123", name = "Oleh"))
-                call.respondRedirect(Endpoint.Authorized.path)
+                saveUserToDatabase(app, result, userDataSource)
             } else {
                 app.log.info("TOKEN VERIFICATION FAILED")
+
                 call.respondRedirect(Endpoint.Unauthorized.path)
             }
         } else {
             app.log.info("EMPTY TOKEN ID")
+
             call.respondRedirect(Endpoint.Unauthorized.path)
         }
+    }
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.saveUserToDatabase(
+    app: Application,
+    result: GoogleIdToken,
+    userDataSource: UserDataSource
+) {
+    val sub = result.payload["sub"].toString()
+    val name = result.payload["name"].toString()
+    val email = result.payload["email"].toString()
+    val picture = result.payload["picture"].toString()
+    val user = User(sub, name, email, picture)
+    val response = userDataSource.saveUserInfo(user)
+
+    if (response) {
+        app.log.info("USER SUCCESSFULLY SAVED/RETRIEVED")
+
+        call.sessions.set(UserSession(id = "123", name = "Oleh"))
+        call.respondRedirect(Endpoint.Authorized.path)
+    } else {
+        app.log.info("ERROR SAVING THE USER")
+
+        call.respondRedirect(Endpoint.Unauthorized.path)
     }
 }
 

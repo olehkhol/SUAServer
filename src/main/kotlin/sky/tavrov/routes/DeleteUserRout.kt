@@ -3,24 +3,22 @@ package sky.tavrov.routes
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import io.ktor.util.pipeline.*
 import sky.tavrov.domain.model.ApiResponse
 import sky.tavrov.domain.model.Endpoint
 import sky.tavrov.domain.model.UserSession
-import sky.tavrov.domain.model.UserUpdate
 import sky.tavrov.domain.repository.UserDataSource
 
-fun Route.updateUserInfoRoute(
+fun Route.deleteUserRoute(
     app: Application,
     userDataSource: UserDataSource
 ) {
     authenticate("auth-session") {
         put(Endpoint.UpdateUser.path) {
             val userSession = call.principal<UserSession>()
-            val userUpdate = call.receive<UserUpdate>()
 
             if (userSession == null) {
                 app.log.info("INVALID SESSION")
@@ -28,7 +26,8 @@ fun Route.updateUserInfoRoute(
                 call.respondRedirect(Endpoint.Unauthorized.path)
             } else {
                 try {
-                    updateUserInfoRoute(app, userDataSource, userSession.id, userUpdate)
+                    call.sessions.clear<UserSession>()
+                    deleteUserRoute(app, userDataSource, userSession.id)
                 } catch (e: Exception) {
                     app.log.info("INVALID SESSION")
 
@@ -39,27 +38,25 @@ fun Route.updateUserInfoRoute(
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.updateUserInfoRoute(
+private suspend fun PipelineContext<Unit, ApplicationCall>.deleteUserRoute(
     app: Application,
     userDataSource: UserDataSource,
-    userId: String,
-    userUpdate: UserUpdate
+    userId: String
 ) {
-    val (firstName, lastName) = userUpdate
-    val result = userDataSource.updateUser(userId, firstName, lastName)
+    val result = userDataSource.deleteUser(userId)
 
     if (result) {
-        app.log.info("USER SUCCESSFULLY UPDATED")
+        app.log.info("USER SUCCESSFULLY DELETED")
 
         call.respond(
             message = ApiResponse(
                 success = true,
-                message = "Successfully updated!"
+                message = "Successfully deleted!"
             ),
             status = HttpStatusCode.OK
         )
     } else {
-        app.log.info("ERROR UPDATING THE USER")
+        app.log.info("ERROR DELETING THE USER")
 
         call.respond(
             message = ApiResponse(success = false),

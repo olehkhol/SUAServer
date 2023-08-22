@@ -53,9 +53,9 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.saveUserToDatabase(
     val email = result.payload["email"].toString()
     val picture = result.payload["picture"].toString()
     val user = User(sub, name, email, picture)
-    val response = userDataSource.saveUserInfo(user)
+    val result = userDataSource.saveUserInfo(user)
 
-    if (response) {
+    if (result) {
         app.log.info("USER SUCCESSFULLY SAVED/RETRIEVED")
 
         call.sessions.set(UserSession(id = sub, name = name))

@@ -45,14 +45,15 @@ fun Route.tokenVerificationRoute(
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.saveUserToDatabase(
     app: Application,
-    result: GoogleIdToken,
+    idToken: GoogleIdToken,
     userDataSource: UserDataSource
 ) {
-    val sub = result.payload["sub"].toString()
-    val name = result.payload["name"].toString()
-    val email = result.payload["email"].toString()
-    val picture = result.payload["picture"].toString()
-    val user = User(sub, name, email, picture)
+    val sub = idToken.payload["sub"].toString()
+    val name = idToken.payload["name"].toString()
+    val (firstName, lastName) = name.split(" ", limit = 2)
+    val email = idToken.payload["email"].toString()
+    val picture = idToken.payload["picture"].toString()
+    val user = User(sub, firstName, lastName, email, picture)
     val result = userDataSource.saveUserInfo(user)
 
     if (result) {

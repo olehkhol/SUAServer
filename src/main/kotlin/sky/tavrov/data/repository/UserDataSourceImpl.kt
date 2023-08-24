@@ -1,5 +1,6 @@
 package sky.tavrov.data.repository
 
+import com.mongodb.client.model.Updates.combine
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
@@ -32,6 +33,9 @@ class UserDataSourceImpl(
     ): Boolean =
         users.updateOne(
             filter = User::id eq userId,
-            update = setValue(property = User::name, value = "$firstName $lastName")
+            update = combine(
+                setValue(User::firstName, firstName),
+                setValue(User::lastName, lastName)
+            )
         ).wasAcknowledged()
 }

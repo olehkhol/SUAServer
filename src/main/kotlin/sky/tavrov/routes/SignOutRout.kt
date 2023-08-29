@@ -12,7 +12,7 @@ import sky.tavrov.domain.model.UserSession
 
 fun Route.signOutRoute() {
     authenticate("auth-session") {
-        get(Endpoint.DeleteUser.path) {
+        get(Endpoint.SignOut.path) {
             call.sessions.clear<UserSession>()
             call.respond(
                 message = ApiResponse(success = true),

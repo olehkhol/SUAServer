@@ -17,7 +17,7 @@ fun Route.deleteUserRoute(
     userDataSource: UserDataSource
 ) {
     authenticate("auth-session") {
-        put(Endpoint.UpdateUser.path) {
+        delete(Endpoint.DeleteUser.path) {
             val userSession = call.principal<UserSession>()
 
             if (userSession == null) {
